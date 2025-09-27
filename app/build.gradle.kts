@@ -52,6 +52,10 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
 
+    //Domain + Data
+    implementation(project(":domain"))
+    implementation(project(":data"))
+
     //ViewModel
     implementation(libs.viewmodel.compose)
 

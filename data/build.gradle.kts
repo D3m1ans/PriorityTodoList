@@ -40,6 +40,9 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
 
+    //Domain
+    implementation(project(":domain"))
+
     //Room
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)

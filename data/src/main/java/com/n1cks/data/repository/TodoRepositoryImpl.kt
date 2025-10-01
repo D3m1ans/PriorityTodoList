@@ -3,6 +3,7 @@ package com.n1cks.data.repository
 import com.n1cks.data.local.dao.TodoDao
 import com.n1cks.data.local.entity.TaskEntity
 import com.n1cks.domain.model.TaskModel
+import com.n1cks.domain.model.TaskPriority
 import com.n1cks.domain.repository.TodoRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -13,6 +14,12 @@ class TodoRepositoryImpl @Inject constructor(
 ) : TodoRepository {
     override fun getTasks(): Flow<List<TaskModel>> {
         return dao.getTasks().map { entity ->
+            entity.map { it.toTask() }
+        }
+    }
+
+    override fun getTasksOrderByPriority(): Flow<List<TaskModel>> {
+        return dao.getTaskOrderByPriority().map { entity->
             entity.map { it.toTask() }
         }
     }
@@ -31,6 +38,13 @@ class TodoRepositoryImpl @Inject constructor(
 
     override suspend fun toggleTaskCompleted(taskId: Int, isCompleted: Boolean) {
         return dao.toggleTaskCompleted(taskId = taskId, isCompleted = isCompleted)
+    }
+
+    override suspend fun updateTaskPriority(
+        taskId: Int,
+        priority: TaskPriority
+    ) {
+        dao.updateTaskPriority(taskId = taskId, priority = priority)
     }
 
     private fun TaskEntity.toTask(): TaskModel {

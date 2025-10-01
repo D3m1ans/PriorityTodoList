@@ -1,10 +1,13 @@
 package com.n1cks.domain.repository
 
 import com.n1cks.domain.model.TaskModel
+import com.n1cks.domain.model.TaskPriority
 import kotlinx.coroutines.flow.Flow
 
 interface TodoRepository {
-    fun getTasks() : Flow<List<TaskModel>>
+    fun getTasks(): Flow<List<TaskModel>>
+
+    fun getTasksOrderByPriority(): Flow<List<TaskModel>>
 
     suspend fun addTask(task: TaskModel)
 
@@ -13,4 +16,6 @@ interface TodoRepository {
     suspend fun updateTask(task: TaskModel)
 
     suspend fun toggleTaskCompleted(taskId: Int, isCompleted: Boolean)
+
+    suspend fun updateTaskPriority(taskId: Int, priority: TaskPriority)
 }

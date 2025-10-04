@@ -21,7 +21,7 @@ object AppModule {
     fun provideTodoDB(@ApplicationContext context: Context) : TodoDB{
         return Room.databaseBuilder(
             context,
-            TodoDB::class,
+            TodoDB::class.java,
             "todo_db"
         ).build()
     }

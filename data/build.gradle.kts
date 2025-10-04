@@ -43,6 +43,9 @@ dependencies {
     //Domain
     implementation(project(":domain"))
 
+    //Coroutines
+    implementation(libs.coroutines.android)
+
     //Room
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)

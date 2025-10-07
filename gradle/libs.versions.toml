@@ -11,6 +11,7 @@ composeBom = "2025.09.01"
 
 roomVersion = "2.8.1"
 hiltVersion = "2.57.2"
+hiltNavigationVersion = "1.3.0"
 vmVersion = "2.9.4"
 kspVersion = "2.2.10-2.0.2"
 corVersion = "1.10.2"
@@ -42,6 +43,7 @@ room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomVers
 #Hilt
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hiltVersion"}
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hiltVersion"}
+hilt-navigation = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationVersion"}
 
 #ViewModel
 viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "vmVersion"}

@@ -40,3 +40,9 @@ val Lato = FontFamily(
     Font(R.font.lato_light, FontWeight.Light),
     Font(R.font.lato_regular, FontWeight.Normal)
 )
+
+val Roboto = FontFamily(
+    Font(R.font.roboto_bold, FontWeight.Bold),
+    Font(R.font.roboto_regular, FontWeight.Normal),
+    Font(R.font.roboto_light, FontWeight.Light)
+)

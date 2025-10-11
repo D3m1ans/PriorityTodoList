@@ -2,6 +2,7 @@ package com.n1cks.data.repository
 
 import com.n1cks.data.local.dao.TodoDao
 import com.n1cks.data.local.entity.TaskEntity
+import com.n1cks.domain.model.TaskFilter
 import com.n1cks.domain.model.TaskModel
 import com.n1cks.domain.model.TaskPriority
 import com.n1cks.domain.repository.TodoRepository
@@ -14,12 +15,6 @@ class TodoRepositoryImpl @Inject constructor(
 ) : TodoRepository {
     override fun getTasks(): Flow<List<TaskModel>> {
         return dao.getTasks().map { entity ->
-            entity.map { it.toTask() }
-        }
-    }
-
-    override fun getTasksOrderByPriority(): Flow<List<TaskModel>> {
-        return dao.getTaskOrderByPriority().map { entity->
             entity.map { it.toTask() }
         }
     }
@@ -45,6 +40,31 @@ class TodoRepositoryImpl @Inject constructor(
         priority: TaskPriority
     ) {
         dao.updateTaskPriority(taskId = taskId, priority = priority)
+    }
+
+    override fun getTasksWithFilters(filter: TaskFilter): Flow<List<TaskModel>> {
+
+        val priority = filter.priority
+        val isCompleted = filter.isCompleted
+
+        return when {
+            priority != null && isCompleted != null -> {
+                dao.getTaskByPriorityAndStatus(priority, isCompleted).map { entities ->
+                    entities.map { it.toTask() }
+                }
+            }
+            priority != null -> {
+                dao.getTaskByPriority(priority).map { entities ->
+                    entities.map { it.toTask() }
+                }
+            }
+            isCompleted != null -> {
+                dao.getTaskByStatus(isCompleted).map { entities ->
+                    entities.map { it.toTask() }
+                }
+            }
+            else -> getTasks()
+        }
     }
 
     private fun TaskEntity.toTask(): TaskModel {

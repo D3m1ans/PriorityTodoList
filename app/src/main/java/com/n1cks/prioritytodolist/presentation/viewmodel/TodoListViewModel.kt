@@ -2,12 +2,12 @@ package com.n1cks.prioritytodolist.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.n1cks.domain.model.TaskFilter
 import com.n1cks.domain.model.TaskModel
-import com.n1cks.domain.model.TaskPriority
 import com.n1cks.domain.usecase.AddTaskUseCase
 import com.n1cks.domain.usecase.DeleteTaskUseCase
 import com.n1cks.domain.usecase.GetAllTasksUseCase
-import com.n1cks.domain.usecase.GetTaskOrderedByPriorityUseCase
+import com.n1cks.domain.usecase.GetTasksWithFiltersUseCase
 import com.n1cks.domain.usecase.ToggleTaskCompletedUseCase
 import com.n1cks.domain.usecase.UpdateTaskPriorityUseCase
 import com.n1cks.domain.usecase.UpdateTaskUseCase
@@ -29,8 +29,8 @@ class TodoListViewModel @Inject constructor(
     private val getAllTaskUseCase: GetAllTasksUseCase,
     private val toggleTaskCompleted: ToggleTaskCompletedUseCase,
     private val updateTaskPriorityUseCase: UpdateTaskPriorityUseCase,
-    private val getTaskOrderedByPriorityUseCase: GetTaskOrderedByPriorityUseCase,
-    private val updateTaskUseCase: UpdateTaskUseCase
+    private val updateTaskUseCase: UpdateTaskUseCase,
+    private val getTasksWithFiltersUseCase: GetTasksWithFiltersUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TodoListState())
@@ -42,12 +42,12 @@ class TodoListViewModel @Inject constructor(
         getTasks()
     }
 
-    fun onEvent(event: TodoListEvents){
-        when(event){
+    fun onEvent(event: TodoListEvents) {
+        when (event) {
             is TodoListEvents.OnAddTask -> {
                 val newTaskTitle = "Новая задача №${_state.value.tasks.size + 1}"
                 val newTask = TaskModel(
-                    title =  newTaskTitle,
+                    title = newTaskTitle,
                     priority = _state.value.selectedPriority
                 )
 
@@ -63,14 +63,14 @@ class TodoListViewModel @Inject constructor(
             }
 
             is TodoListEvents.OnEditDialogDismiss -> {
-                if (event.task != null && event.task.id != null){
+                if (event.task != null && event.task.id != null) {
                     viewModelScope.launch {
                         val updatedTask = event.task.copy(
                             title = event.newTitle ?: event.task.title,
                             desc = event.newDesc ?: event.task.desc,
                             priority = event.newPriority ?: event.task.priority
                         )
-                        if (updatedTask != event.task){
+                        if (updatedTask != event.task) {
                             updateTaskUseCase(updatedTask)
                         }
                     }
@@ -81,6 +81,7 @@ class TodoListViewModel @Inject constructor(
                     editDialogDesc = ""
                 )
             }
+
             is TodoListEvents.OnEditTask -> {
                 _state.value = _state.value.copy(
                     todoTaskEdit = event.task,
@@ -95,11 +96,12 @@ class TodoListViewModel @Inject constructor(
                     updateTaskPriorityUseCase(event.task, event.priority)
                 }
             }
+
             is TodoListEvents.OnPriorityFilter -> {
-                _state.value = _state.value.copy(
-                    selectedPriority = event.priority ?: TaskPriority.MEDIUM
-                )
+               val newFilter = _state.value.currentFilter.copy(priority = event.priority)
+                getTaskWithFilter(newFilter)
             }
+
             is TodoListEvents.OnToggleSort -> {
                 _state.value = _state.value.copy(
                     sortByPriority = !_state.value.sortByPriority
@@ -116,18 +118,41 @@ class TodoListViewModel @Inject constructor(
                     )
                 }
             }
+
+            TodoListEvents.OnClearFilter -> {
+                getTaskWithFilter(TaskFilter.DEFAULT)
+            }
+            TodoListEvents.OnFilterClick -> {
+                _state.value = _state.value.copy(
+                    showFilterDialog = !_state.value.showFilterDialog
+                )
+            }
+
+            is TodoListEvents.OnStatusFilter -> {
+                val newFilter = _state.value.currentFilter.copy(isCompleted = event.isCompleted)
+                getTaskWithFilter(newFilter)
+            }
         }
     }
 
-    private fun getTasks(){
+    private fun getTasks() {
+        getTaskWithFilter(TaskFilter.DEFAULT)
+    }
+
+    private fun getTaskWithFilter(filter: TaskFilter) {
         getTaskJob?.cancel()
-        getTaskJob = if (_state.value.sortByPriority){
-            getTaskOrderedByPriorityUseCase()
-        } else {
+
+        getTaskJob = if (filter.hasActiveFilters()){
+            getTasksWithFiltersUseCase(filter)
+        } else{
             getAllTaskUseCase()
         }
-            .onEach { tasks->
-                _state.value = state.value.copy(tasks = tasks)
+            .onEach { tasks ->
+                _state.value = state.value.copy(
+                    tasks = tasks,
+                    currentFilter = filter,
+                    isFiltering = filter.hasActiveFilters()
+                )
             }
             .launchIn(viewModelScope)
     }

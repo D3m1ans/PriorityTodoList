@@ -17,4 +17,7 @@ sealed interface TodoListEvents {
     data class OnPriorityChange(val task: TaskModel, val priority: TaskPriority) : TodoListEvents
     data object OnToggleSort : TodoListEvents
     data class OnPriorityFilter(val priority: TaskPriority?) : TodoListEvents
+    data object OnFilterClick: TodoListEvents
+    data class OnStatusFilter(val isCompleted: Boolean?) : TodoListEvents
+    data object OnClearFilter : TodoListEvents
 }

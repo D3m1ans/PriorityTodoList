@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TodoDao {
     @Query("SELECT * FROM task")
-    fun getTasks() : Flow<List<TaskEntity>>
+    fun getTasks(): Flow<List<TaskEntity>>
 
     @Insert
     suspend fun addTask(task: TaskEntity)
@@ -28,17 +28,15 @@ interface TodoDao {
 
     @Query("UPDATE task SET priority = :priority WHERE id = :taskId")
     suspend fun updateTaskPriority(taskId: Int, priority: TaskPriority)
+    @Query("SELECT * FROM task WHERE priority = :priority")
+    fun getTaskByPriority(priority: TaskPriority): Flow<List<TaskEntity>>
 
-    @Query("""
-        SELECT * FROM task 
-        ORDER BY 
-            CASE priority 
-                WHEN 'URGENT' THEN 1 
-                WHEN 'HIGH' THEN 2 
-                WHEN 'MEDIUM' THEN 3 
-                WHEN 'LOW' THEN 4 
-            END, 
-            createdAt DESC
-    """)
-    fun getTaskOrderByPriority(): Flow<List<TaskEntity>>
+    @Query("SELECT * FROM task WHERE isCompleted = :isCompleted")
+    fun getTaskByStatus(isCompleted: Boolean): Flow<List<TaskEntity>>
+
+    @Query("SELECT * FROM task WHERE priority = :priority AND isCompleted = :isCompleted")
+    fun getTaskByPriorityAndStatus(
+        priority: TaskPriority,
+        isCompleted: Boolean
+    ): Flow<List<TaskEntity>>
 }

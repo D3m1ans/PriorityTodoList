@@ -18,6 +18,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -98,7 +99,7 @@ class TodoListViewModel @Inject constructor(
             }
 
             is TodoListEvents.OnPriorityFilter -> {
-               val newFilter = _state.value.currentFilter.copy(priority = event.priority)
+                val newFilter = _state.value.currentFilter.copy(priority = event.priority)
                 getTaskWithFilter(newFilter)
             }
 
@@ -122,6 +123,7 @@ class TodoListViewModel @Inject constructor(
             TodoListEvents.OnClearFilter -> {
                 getTaskWithFilter(TaskFilter.DEFAULT)
             }
+
             TodoListEvents.OnFilterClick -> {
                 _state.value = _state.value.copy(
                     showFilterDialog = !_state.value.showFilterDialog
@@ -142,10 +144,15 @@ class TodoListViewModel @Inject constructor(
     private fun getTaskWithFilter(filter: TaskFilter) {
         getTaskJob?.cancel()
 
-        getTaskJob = if (filter.hasActiveFilters()){
+        getTaskJob = if (filter.hasActiveFilters()) {
             getTasksWithFiltersUseCase(filter)
-        } else{
-            getAllTaskUseCase()
+        } else {
+            getAllTaskUseCase().map { tasks ->
+                tasks.sortedWith(
+                    compareBy<TaskModel> { it.isCompleted }
+                        .thenByDescending { it.createdAt }
+                )
+            }
         }
             .onEach { tasks ->
                 _state.value = state.value.copy(

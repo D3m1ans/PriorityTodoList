@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TodoDao {
-    @Query("SELECT * FROM task")
+    @Query("SELECT * FROM task ORDER BY createdAt")
     fun getTasks(): Flow<List<TaskEntity>>
 
     @Insert

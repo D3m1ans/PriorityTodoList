@@ -47,8 +47,8 @@ fun TaskItem(
                 elevation = 16.dp,
                 shape = RoundedCornerShape(30.dp),
                 clip = true,
-                ambientColor = priorityColor,
-                spotColor = priorityColor
+                ambientColor = if (!task.isCompleted) priorityColor else Color.Black,
+                spotColor = if (!task.isCompleted) priorityColor else Color.Black
             ),
         shape = RoundedCornerShape(30.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
@@ -111,7 +111,7 @@ fun TaskItem(
                     painter = painterResource(R.drawable.ic_delete),
                     contentDescription = "Delete task",
                     modifier = Modifier.size(20.dp),
-                    tint = priorityColor
+                    tint = if (!task.isCompleted) priorityColor else Color.Black
                 )
             }
         }
